@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+@Library('shared-library') _  // Import the shared library, which will be fetched from the repository
+
 pipeline {
   agent { label 'executor-v2' }
 
@@ -13,9 +15,19 @@ pipeline {
   }
 
   stages {
+    stage('Clone Shared Jenkins Library') {
+      steps {
+        script {
+          // Clone the shared Jenkins library repository dynamically (provided via the API)
+          String sharedRepoUrl = env.SHARED_LIB_REPO_URL // This will be passed to the pipeline as an environment variable
+          cloneSharedLibrary(sharedRepoUrl)  // Call method from shared library
+        }
+      }
+    }
+
     stage('Build Docker image') {
       steps {
-        sh './bin/build'
+        sharedLibrary.buildDockerImage()  // Call shared library's method for building Docker image
       }
     }
 
@@ -23,19 +35,19 @@ pipeline {
       parallel {
         stage('Test Postgres') {
           steps {
-            sh './test/test postgres'
+            sharedLibrary.testDatabase("postgres")  // Call shared library's method for testing Postgres
           }
         }
 
         stage('Test MySQL') {
           steps {
-            sh './test/test mysql'
+            sharedLibrary.testDatabase("mysql")  // Call shared library's method for testing MySQL
           }
         }
 
         stage('Test MSSQL') {
           steps {
-            sh './test/test mssql'
+            sharedLibrary.testDatabase("mssql")  // Call shared library's method for testing MSSQL
           }
         }
       }
@@ -44,19 +56,19 @@ pipeline {
     stage('Scan Docker image') {
       parallel {
         stage('Scan Docker image for fixable issues') {
-          steps{
+          steps {
             script {
               TAG = sh(returnStdout: true, script: 'cat VERSION')
             }
-            scanAndReport("demo-app:${TAG}", "HIGH", false)
+            sharedLibrary.scanDockerImage("demo-app:${TAG}", "HIGH", false)  // Call shared library's scan method
           }
         }
         stage('Scan Docker image for all issues') {
-          steps{
+          steps {
             script {
               TAG = sh(returnStdout: true, script: 'cat VERSION')
             }
-            scanAndReport("demo-app:${TAG}", "NONE", true)
+            sharedLibrary.scanDockerImage("demo-app:${TAG}", "NONE", true)  // Call shared library's scan method
           }
         }
       }
@@ -64,15 +76,11 @@ pipeline {
 
     stage('Publish Docker image to registry') {
       when {
-        // Only run this stage when it's a tag build matching vA.B.C
-        tag(
-          pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+\$",
-          comparator: "REGEXP"
-        )
+        tag(pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+\$", comparator: "REGEXP")
       }
 
       steps {
-        sh './bin/publish'
+        sharedLibrary.publishDockerImage()  // Call shared library's publish method
       }
     }
   }
