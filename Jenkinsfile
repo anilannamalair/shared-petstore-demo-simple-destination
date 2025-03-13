@@ -1,4 +1,4 @@
-@Library('my-shared-library') _  // Load the shared library
+@Library('shared-jenkins-library') _  // Load the shared library
 
 pipeline {
     agent { label 'executor-v2' }
@@ -16,7 +16,8 @@ pipeline {
         stage('Build Docker image') {
             steps {
                 script {
-                    org.example.BuildAndTest.buildDockerImage()
+                    // Assuming 'buildAndTest' is a function in your shared library
+                    buildAndTest.buildDockerImage()
                 }
             }
         }
@@ -26,7 +27,7 @@ pipeline {
                 stage('Test Postgres') {
                     steps {
                         script {
-                            org.example.BuildAndTest.testPostgres()
+                            buildAndTest.testPostgres()
                         }
                     }
                 }
@@ -34,7 +35,7 @@ pipeline {
                 stage('Test MySQL') {
                     steps {
                         script {
-                            org.example.BuildAndTest.testMySQL()
+                            buildAndTest.testMySQL()
                         }
                     }
                 }
@@ -42,7 +43,7 @@ pipeline {
                 stage('Test MSSQL') {
                     steps {
                         script {
-                            org.example.BuildAndTest.testMSSQL()
+                            buildAndTest.testMSSQL()
                         }
                     }
                 }
@@ -54,16 +55,16 @@ pipeline {
                 stage('Scan Docker image for fixable issues') {
                     steps {
                         script {
-                            TAG = sh(returnStdout: true, script: 'cat VERSION')
-                            org.example.BuildAndTest.scanImage(TAG, "HIGH", false)
+                            TAG = sh(returnStdout: true, script: 'cat VERSION').trim()
+                            buildAndTest.scanImage(TAG, "HIGH", false)
                         }
                     }
                 }
                 stage('Scan Docker image for all issues') {
                     steps {
                         script {
-                            TAG = sh(returnStdout: true, script: 'cat VERSION')
-                            org.example.BuildAndTest.scanImage(TAG, "NONE", true)
+                            TAG = sh(returnStdout: true, script: 'cat VERSION').trim()
+                            buildAndTest.scanImage(TAG, "NONE", true)
                         }
                     }
                 }
@@ -76,7 +77,7 @@ pipeline {
             }
             steps {
                 script {
-                    org.example.BuildAndTest.publishImage()
+                    buildAndTest.publishImage()
                 }
             }
         }
