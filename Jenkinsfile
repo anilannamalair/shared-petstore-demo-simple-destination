@@ -1,99 +1,65 @@
-#!/usr/bin/env groovy
-
-@Library('shared-library') _  // Assuming the library is named 'your-shared-library'
+@Library('my-shared-library') _  // Import the shared library
 
 pipeline {
-  agent { label 'executor-v2' }
+    agent any  // You can specify the agent (e.g., `linux`, `windows`, `docker`)
 
-  options {
-    timestamps()
-    buildDiscarder(logRotator(numToKeepStr: '30'))
-  }
-
-  triggers {
-    cron(getDailyCronString())
-  }
-
-  stages {
-    stage('Build Docker image') {
-      steps {
-        script {
-          buildApplication()  // Using the buildApplication script from the shared library
-        }
-      }
+    environment {
+        JAVA_HOME = '/path/to/java'  // Set Java home if necessary
     }
 
-    stage('Test') {
-      parallel {
-        stage('Test Postgres') {
-          steps {
-            script {
-              testDatabases("postgres")  // Using the testDatabases script from the shared library
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm  // Checkout the source code
             }
-          }
         }
 
-        stage('Test MySQL') {
-          steps {
-            script {
-              testDatabases("mysql")  // Using the testDatabases script from the shared library
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Using the shared library function to install dependencies
+                    installDependencies()
+                }
             }
-          }
         }
 
-        stage('Test MSSQL') {
-          steps {
-            script {
-              testDatabases("mssql")  // Using the testDatabases script from the shared library
+        stage('Build') {
+            steps {
+                script {
+                    // Using the shared library function to build the project
+                    buildProject()
+                }
             }
-          }
         }
-      }
+
+        stage('Test') {
+            steps {
+                script {
+                    // Using the shared library function to run tests
+                    runTests()
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // Using the shared library function to deploy the project
+                    deployProject()
+                }
+            }
+        }
     }
 
-    stage('Scan Docker image') {
-      parallel {
-        stage('Scan Docker image for fixable issues') {
-          steps {
-            script {
-              TAG = sh(returnStdout: true, script: 'cat VERSION').trim()
-              scanAndReport("demo-app:${TAG}", "HIGH", false)  // Assuming scanAndReport is a method in your library
-            }
-          }
+    post {
+        always {
+            echo 'Pipeline finished!'
         }
-        stage('Scan Docker image for all issues') {
-          steps {
-            script {
-              TAG = sh(returnStdout: true, script: 'cat VERSION').trim()
-              scanAndReport("demo-app:${TAG}", "NONE", true)  // Assuming scanAndReport is a method in your library
-            }
-          }
+        success {
+            echo 'Pipeline completed successfully!'
         }
-      }
-    }
-
-    stage('Publish Docker image to registry') {
-      when {
-        tag(
-          pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+\$",
-          comparator: "REGEXP"
-        )
-      }
-
-      steps {
-        script {
-          sh './bin/publish'  // Assuming publish logic is not abstracted in the shared library
+        failure {
+            echo 'Pipeline failed!'
         }
-      }
     }
-  }
-
-  post {
-    always {
-      script {
-        cleanupAndNotify(currentBuild.currentResult)  // Assuming cleanupAndNotify is a method in your library
-      }
-    }
-  }
 }
-
