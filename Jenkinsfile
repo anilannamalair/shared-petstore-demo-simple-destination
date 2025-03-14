@@ -4,11 +4,38 @@ pipeline {
     agent any
 
     stages {
+         stage('Hello') {
+            steps {
+                script {
+                    sayHello("Anil")
+                }
+            }
+        }
+        stage('Install Maven Dependencies') {
+            steps {
+                script {
+                    installMavenDependencies()
+                }
+            }
+        }
         stage('Build') {
             steps {
                 script {
-                    // Assuming your buildProject.groovy is under 'vars' in the shared library
                     buildProjectWithMaven()
+                }
+            }
+        }
+         stage('Run Tests') {
+            steps {
+                script {
+                    runTestsWithMaven()
+                }
+            }
+        }
+         stage('Deploy') {
+            steps {
+                script {
+                    deployToServer()
                 }
             }
         }
