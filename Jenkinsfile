@@ -1,4 +1,4 @@
-@Library('my-shared-library-') _  // Reference the shared library
+@Library('my-shared-library') _  // Reference the shared library
 
 pipeline {
     agent any
