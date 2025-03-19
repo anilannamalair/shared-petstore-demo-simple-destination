@@ -1,37 +1,30 @@
-@Library('my-shared-library') _  // Reference the shared library
-
 pipeline {
     agent any
-
     stages {
-         stage('Hello') {
+        stage('Checkout') {
             steps {
-                script {
-                    sayHello("Anil")
-                }
-            }
-        }
-        stage('Install Maven Dependencies') {
-            steps {
-                script {
-                    installMavenDependencies()
-                }
+                echo 'Simulating checkout...' // In a real scenario, you'd use 'git' or similar
             }
         }
         stage('Build') {
             steps {
-                script {
-                    buildProjectWithMaven()
-                }
+                sh 'echo "Building..."' // Replace with actual build commands
             }
         }
-         stage('Run Tests') {
+        stage('Test') {
             steps {
-                script {
-                    runTestsWithMaven()
-                }
+                echo 'Running basic tests...' // Replace with real test commands
             }
         }
-        
+        stage('Deploy') {
+            steps {
+                echo 'Simulating deployment...' // Replace with real deployment commands
+            }
+        }
+        stage('Cleanup') {
+            steps {
+                echo 'Cleaning up temporary files...'
+            }
+        }
     }
 }
