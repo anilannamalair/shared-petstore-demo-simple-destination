@@ -3,27 +3,22 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Simulating checkout...' // In a real scenario, you'd use 'git' or similar
+                git branch: 'master', url: "https://github.com/jfrog/project-examples.git"
             }
         }
         stage('Build') {
             steps {
-                sh 'echo "Building..."' // Replace with actual build commands
+                sh 'mvn clean install' // Basic Maven build
             }
         }
         stage('Test') {
             steps {
-                echo 'Running basic tests...' // Replace with real test commands
+                sh 'mvn test' // Basic Maven test
             }
         }
         stage('Deploy') {
             steps {
-                echo 'Simulating deployment...' // Replace with real deployment commands
-            }
-        }
-        stage('Cleanup') {
-            steps {
-                echo 'Cleaning up temporary files...'
+                echo 'Simulating deployment' // Placeholder for deployment steps
             }
         }
     }
