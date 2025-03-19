@@ -9,5 +9,10 @@ pipeline {
                 echo 'With options'
             }
         }
+        stage('Another Simple Stage') {
+            steps {
+                echo 'This is another stage'
+            }
+        }
     }
 }
