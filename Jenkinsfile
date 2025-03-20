@@ -11,17 +11,17 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                sh 'npm install' // Or 'pip install -r requirements.txt', 'mvn dependency:go-offline', etc.
+                sh 'mvn clean install -DskipTests' // This will install dependencies and skip tests
             }
         }
         stage('Run Unit Tests') {
             steps {
-                sh 'npm test' // Or 'pytest', 'mvn test', etc.
+                sh 'mvn test' // Run unit tests using Maven
             }
         }
         stage('Build Artifact') {
             steps {
-                sh 'npm run build' // Or 'mvn package', 'docker build -t my-image .', etc.
+                sh 'mvn package' // This will build the Maven artifact (e.g., JAR or WAR file)
             }
         }
         stage('Deploy to Development') {
