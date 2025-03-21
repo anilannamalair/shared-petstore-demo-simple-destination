@@ -68,3 +68,38 @@ jobs:
       name: 'Run Unit Tests: Run shell command'
 name: Jenkins to GitHub Actions
 'on': push
+
+jobs:
+  install-dependencies-972723252:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout Source Code
+    - run: mvn clean install -DskipTests
+      name: 'Install Dependencies: Run shell command'
+  build-artifact--2136161525:
+    needs: run-unit-tests-1521333229
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout Source Code
+    - run: mvn package
+      name: 'Build Artifact: Run shell command'
+  deploy-to-development-echo-302324192:
+    needs: build-artifact--2136161525
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout Source Code
+    - run: echo "Deploying to development environment..."
+      name: 'Deploy to Development: Echo message'
+  run-unit-tests-1521333229:
+    needs: install-dependencies-972723252
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout Source Code
+    - run: mvn test
+      name: 'Run Unit Tests: Run shell command'
+name: Jenkins to GitHub Actions
+'on': push
