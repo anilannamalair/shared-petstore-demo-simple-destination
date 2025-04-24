@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Checkout Source Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/anilannamalair/shared-petstore-demo-simple-destination.git' // Replace with your repo
+                git branch: 'main', url: 'https://github.com/anilannamalair/shared-petstore-demo-simple.git' // Replace with your repo
             }
         }
         stage('Install Dependencies') {
